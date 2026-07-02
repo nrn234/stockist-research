@@ -55,7 +55,7 @@ const TICKER =
 
 // ─── NEW INTERACTIVE COMPONENTS ──────────────────────────────────────────────
 
-// 1. Interactive Mouse Particles (Antigravity Style)
+// Interactive Mouse Particles & "Boom" Click Effect
 function ParticleCanvas() {
   const canvasRef = useRef(null);
 
@@ -64,9 +64,9 @@ function ParticleCanvas() {
     const ctx = canvas.getContext("2d");
     let animationFrameId;
     let particles = [];
+    let bursts = []; // Holds the "boom" explosion particles
     const colors = ["#16a34a", "#0ea5e9", "#7c3aed", "#d97706", "#dc2626", "#ea580c"];
     
-    // Track mouse position
     let mouse = { x: -1000, y: -1000 };
 
     const resize = () => {
@@ -77,7 +77,7 @@ function ParticleCanvas() {
 
     const initParticles = () => {
       particles = [];
-      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 9000); // Responsive density
+      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 9000); 
       for (let i = 0; i < numParticles; i++) {
         particles.push({
           x: Math.random() * canvas.width,
@@ -94,16 +94,15 @@ function ParticleCanvas() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
+      // 1. Draw floating ambient particles
       particles.forEach((p) => {
-        // Normal movement
         p.x += p.vx;
         p.y += p.vy;
 
-        // Mouse repulsion logic
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const maxDistance = 150; // How close mouse needs to be to push particles
+        const maxDistance = 150; 
 
         if (distance < maxDistance) {
           const force = (maxDistance - distance) / maxDistance;
@@ -111,13 +110,11 @@ function ParticleCanvas() {
           p.y -= (dy / distance) * force * 3;
         }
 
-        // Screen wrap
         if (p.x < 0) p.x = canvas.width;
         if (p.x > canvas.width) p.x = 0;
         if (p.y < 0) p.y = canvas.height;
         if (p.y > canvas.height) p.y = 0;
 
-        // Draw particle (little dash like Antigravity)
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.angle);
@@ -130,17 +127,61 @@ function ParticleCanvas() {
         ctx.restore();
       });
 
+      // 2. Draw the "Boom" Click Bursts
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        let b = bursts[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life -= 0.02; // Fade out speed
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, b.life); // Ensure alpha doesn't go below 0
+        ctx.translate(b.x, b.y);
+        ctx.beginPath();
+        ctx.arc(0, 0, b.size, 0, Math.PI * 2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+        ctx.restore();
+
+        // Remove dead particles
+        if (b.life <= 0) bursts.splice(i, 1);
+      }
+
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", (e) => {
-      // Offset mouse to account for scrolling
+    // Track mouse
+    const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = e.clientX - rect.left;
       mouse.y = e.clientY - rect.top;
-    });
-    // Reset mouse offscreen when leaving
+    };
+
+    // Trigger "Boom" on click
+    const handleClick = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      
+      // Create 35 new fast-moving particles
+      for(let i = 0; i < 35; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 2; // Random speed burst
+        bursts.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 4 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1.0 
+        });
+      }
+    };
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("click", handleClick);
     window.addEventListener("mouseout", () => { mouse = { x: -1000, y: -1000 } });
 
     resize();
@@ -148,6 +189,8 @@ function ParticleCanvas() {
 
     return () => {
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -164,7 +207,7 @@ function ParticleCanvas() {
   );
 }
 
-// 2. Typing Effect with Gradient Cursor
+// Typing Effect with Gradient Cursor
 function TypewriterSubtitle({ text }) {
   const [displayedText, setDisplayedText] = useState("");
   const [index, setIndex] = useState(0);
@@ -412,7 +455,7 @@ export default function StockistLanding() {
         padding: "4rem 1.5rem 8rem", overflow: "hidden",
       }}>
         
-        {/* NEW: Interactive Particle Canvas */}
+        {/* Interactive Particle Canvas with Click Boom Effect */}
         <ParticleCanvas />
 
         {/* grid background */}
@@ -450,7 +493,6 @@ export default function StockistLanding() {
             {RESEARCH_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
           </div>
 
-          {/* NEW: Typewriter Effect for Subtitle */}
           <TypewriterSubtitle text="Institutional-quality equity research for every Indian retail investor. Real-time BSE/NSE alerts · XBRL parsing · Smart scoring engine." />
 
           <div style={{ display: "flex", gap: ".875rem", justifyContent: "center", flexWrap: "wrap" }}>
