@@ -55,7 +55,7 @@ const TICKER =
 
 // ─── NEW INTERACTIVE COMPONENTS ──────────────────────────────────────────────
 
-// Interactive Mouse Particles & "Boom" Click Effect
+// Interactive Mouse Particles & "Boom" Click Effect (Now Fixed to Screen)
 function ParticleCanvas() {
   const canvasRef = useRef(null);
 
@@ -64,7 +64,7 @@ function ParticleCanvas() {
     const ctx = canvas.getContext("2d");
     let animationFrameId;
     let particles = [];
-    let bursts = []; // Holds the "boom" explosion particles
+    let bursts = []; 
     const colors = ["#16a34a", "#0ea5e9", "#7c3aed", "#d97706", "#dc2626", "#ea580c"];
     
     let mouse = { x: -1000, y: -1000 };
@@ -94,7 +94,6 @@ function ParticleCanvas() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // 1. Draw floating ambient particles
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -127,15 +126,14 @@ function ParticleCanvas() {
         ctx.restore();
       });
 
-      // 2. Draw the "Boom" Click Bursts
       for (let i = bursts.length - 1; i >= 0; i--) {
         let b = bursts[i];
         b.x += b.vx;
         b.y += b.vy;
-        b.life -= 0.02; // Fade out speed
+        b.life -= 0.02; 
 
         ctx.save();
-        ctx.globalAlpha = Math.max(0, b.life); // Ensure alpha doesn't go below 0
+        ctx.globalAlpha = Math.max(0, b.life); 
         ctx.translate(b.x, b.y);
         ctx.beginPath();
         ctx.arc(0, 0, b.size, 0, Math.PI * 2);
@@ -143,30 +141,25 @@ function ParticleCanvas() {
         ctx.fill();
         ctx.restore();
 
-        // Remove dead particles
         if (b.life <= 0) bursts.splice(i, 1);
       }
 
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    // Track mouse
+    // Since canvas is position: fixed, we use clientX/clientY directly!
     const handleMouseMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     };
 
-    // Trigger "Boom" on click
     const handleClick = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const cx = e.clientX - rect.left;
-      const cy = e.clientY - rect.top;
+      const cx = e.clientX;
+      const cy = e.clientY;
       
-      // Create 35 new fast-moving particles
       for(let i = 0; i < 35; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 6 + 2; // Random speed burst
+        const speed = Math.random() * 6 + 2; 
         bursts.push({
           x: cx,
           y: cy,
@@ -199,15 +192,15 @@ function ParticleCanvas() {
     <canvas
       ref={canvasRef}
       style={{
-        position: "absolute", inset: 0,
-        width: "100%", height: "100%",
+        position: "fixed", top: 0, left: 0,
+        width: "100vw", height: "100vh",
         pointerEvents: "none", zIndex: 0, opacity: 0.6
       }}
     />
   );
 }
 
-// ─── UPDATED: Multi-message Looping Typewriter ───────────────────────────────
+// Multi-message Looping Typewriter
 function TypewriterSubtitle({ messages }) {
   const [displayedText, setDisplayedText] = useState("");
   const [messageIndex, setMessageIndex] = useState(0);
@@ -218,22 +211,18 @@ function TypewriterSubtitle({ messages }) {
     let timeout;
 
     if (!isDeleting && displayedText !== currentMessage) {
-      // Typing forward
       timeout = setTimeout(() => {
         setDisplayedText(currentMessage.slice(0, displayedText.length + 1));
-      }, 40); // Typing speed
+      }, 40);
     } else if (!isDeleting && displayedText === currentMessage) {
-      // Pause at the end before deleting
       timeout = setTimeout(() => {
         setIsDeleting(true);
-      }, 2500); // 2.5 second pause
+      }, 2500); 
     } else if (isDeleting && displayedText !== "") {
-      // Deleting backward
       timeout = setTimeout(() => {
         setDisplayedText(currentMessage.slice(0, displayedText.length - 1));
-      }, 20); // Deleting speed (usually faster)
+      }, 20); 
     } else if (isDeleting && displayedText === "") {
-      // Move to the next message
       setIsDeleting(false);
       setMessageIndex((prev) => (prev + 1) % messages.length);
     }
@@ -242,10 +231,7 @@ function TypewriterSubtitle({ messages }) {
   }, [displayedText, isDeleting, messageIndex, messages]);
 
   return (
-    <div style={{
-      // Fixed min-height ensures the buttons below don't jump up and down while deleting
-      minHeight: "5em", display: "flex", justifyContent: "center", marginBottom: "1.5rem"
-    }}>
+    <div style={{ minHeight: "5em", display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
       <p style={{
         color: "#0f172a", fontSize: "clamp(1rem,2vw,1.25rem)",
         maxWidth: "550px", margin: 0, lineHeight: 1.75,
@@ -422,7 +408,7 @@ export default function StockistLanding() {
   }, []);
 
   return (
-    <main style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#FAFAF9", color: "#0f172a", overflowX: "hidden" }}>
+    <main style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#FAFAF9", color: "#0f172a", overflowX: "hidden", position: "relative" }}>
       <style>{`
         @keyframes marq { from { transform:translateX(0) } to { transform:translateX(-50%) } }
         .ticker { display:inline-block; white-space:nowrap; animation:marq 40s linear infinite; }
@@ -432,6 +418,17 @@ export default function StockistLanding() {
         * { box-sizing:border-box; }
         a { text-decoration:none; }
       `}</style>
+
+      {/* ── GLOBAL BACKGROUND EFFECTS ─────────────────────────────────── */}
+      <ParticleCanvas />
+      
+      {/* Global Grid */}
+      <div style={{
+        position: "fixed", inset: 0,
+        backgroundImage: "linear-gradient(rgba(22,163,74,.07) 1px,transparent 1px),linear-gradient(to right,rgba(22,163,74,.07) 1px,transparent 1px)",
+        backgroundSize: "48px 48px",
+        zIndex: 0, pointerEvents: "none"
+      }} />
 
       {/* ── TOP NAV ───────────────────────────────────────────────────── */}
       <nav style={{
@@ -477,22 +474,8 @@ export default function StockistLanding() {
         minHeight: "calc(100vh - 60px)", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         position: "relative", textAlign: "center",
-        padding: "4rem 1.5rem 8rem", overflow: "hidden",
+        padding: "4rem 1.5rem 8rem", overflow: "hidden", zIndex: 10
       }}>
-        
-        {/* Interactive Particle Canvas with Click Boom Effect */}
-        <ParticleCanvas />
-
-        {/* grid background */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "linear-gradient(rgba(22,163,74,.07) 1px,transparent 1px),linear-gradient(to right,rgba(22,163,74,.07) 1px,transparent 1px)",
-          backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)",
-          zIndex: -1
-        }} />
-
         <div style={{ zIndex: 1, position: "relative", pointerEvents: "auto" }}>
           <span style={{
             color: "#16a34a", fontWeight: 700, letterSpacing: ".2em",
@@ -518,7 +501,6 @@ export default function StockistLanding() {
             {RESEARCH_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
           </div>
 
-          {/* THIS IS THE NEW ROTATING TYPEWRITER! */}
           <TypewriterSubtitle messages={[
             "Institutional-quality equity research for every Indian retail investor.",
             "Real-time BSE & NSE alerts delivered straight to your Telegram.",
@@ -562,7 +544,7 @@ export default function StockistLanding() {
       </section>
 
       {/* ── TOOLS ────────────────────────────────────────────────────── */}
-      <section id="tools" style={{ padding: "1rem 2rem 6rem", background: "#fff", overflow: "hidden" }}>
+      <section id="tools" style={{ padding: "1rem 2rem 6rem", background: "rgba(255,255,255,0.6)", overflow: "hidden", position: "relative", zIndex: 10 }}>
         <StripeHeading text="Tools" />
         <div style={{
           display: "grid",
@@ -575,7 +557,7 @@ export default function StockistLanding() {
       </section>
 
       {/* ── STATS ────────────────────────────────────────────────────── */}
-      <section style={{ padding: "4rem 2rem", background: "#FAFAF9", textAlign: "center" }}>
+      <section style={{ padding: "4rem 2rem", background: "transparent", textAlign: "center", position: "relative", zIndex: 10 }}>
         <h2 style={{ fontSize: "clamp(1.4rem,3.5vw,2.25rem)", fontWeight: 800, maxWidth: "560px", margin: "0 auto 2.5rem", lineHeight: 1.25 }}>
           Trusted by Indian retail investors nationwide 🇮🇳
         </h2>
@@ -593,7 +575,7 @@ export default function StockistLanding() {
       </section>
 
       {/* ── PRINCIPLES ───────────────────────────────────────────────── */}
-      <section id="principles" style={{ padding: "1rem 2rem 6rem", background: "#fff", overflow: "hidden" }}>
+      <section id="principles" style={{ padding: "1rem 2rem 6rem", background: "rgba(255,255,255,0.6)", overflow: "hidden", position: "relative", zIndex: 10 }}>
         <StripeHeading text="Principles" size="clamp(2.5rem,7vw,5rem)" />
         <div style={{ display: "flex", gap: "1.25rem", maxWidth: "1050px", margin: "0 auto", flexWrap: "wrap" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", flex: "2 1 580px" }}>
@@ -611,7 +593,7 @@ export default function StockistLanding() {
       </section>
 
       {/* ── ABOUT ────────────────────────────────────────────────────── */}
-      <section id="about" style={{ padding: "5rem 2rem", background: "#FAFAF9", textAlign: "center" }}>
+      <section id="about" style={{ padding: "5rem 2rem", background: "transparent", textAlign: "center", position: "relative", zIndex: 10 }}>
         <p style={{ color: "#16a34a", fontWeight: 700, letterSpacing: ".15em", fontSize: ".75rem", textTransform: "uppercase", marginBottom: "1rem" }}>
           The mission
         </p>
@@ -624,7 +606,7 @@ export default function StockistLanding() {
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────────────── */}
-      <footer style={{ background: "#0f1a0f", color: "#fff", padding: "3rem 2rem 2rem", textAlign: "center" }}>
+      <footer style={{ background: "#0f1a0f", color: "#fff", padding: "3rem 2rem 2rem", textAlign: "center", position: "relative", zIndex: 10 }}>
         <div style={{ fontSize: "1.1rem", fontWeight: 900, color: "#FBC138", letterSpacing: ".1em", marginBottom: ".6rem" }}>
           📊 STOCKIST RESEARCH
         </div>
