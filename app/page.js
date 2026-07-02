@@ -680,3 +680,94 @@ export default function StockistLanding() {
     </main>
   );
 }
+
+
+"use client";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ─── CONFIGURATION ───────────────────────────────────────────────────────────
+const TELEGRAM_LINK = "https://t.me/your_actual_channel_link_here";
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const TOOLS = [
+  { name: "Live BSE/NSE Tracker", tag: "REAL-TIME", emoji: "01", desc: "Sub-millisecond filing catcher." },
+  { name: "Results Pipeline",     tag: "ANALYSIS",  emoji: "02", desc: "QoQ & YoY metrics computed instantly." },
+  { name: "Telegram Bot",         tag: "ALERTS",    emoji: "03", desc: "Instant terminal-to-mobile delivery." },
+  { name: "Verdict Engine",       tag: "SCORING",   emoji: "04", desc: "6-tier algorithmic grading system." },
+  { name: "XBRL Parser",          tag: "DATA",      emoji: "05", desc: "Deep extraction of nested financials." },
+  { name: "Research Reporter",    tag: "REPORTS",   emoji: "06", desc: "Institutional-grade PDF generation." },
+];
+
+const TICKER_DATA = "BSE: ^BSESN +1.2% | NSE: ^NSEI +0.8% | XBRL PARSER: ONLINE | VERDICT ENGINE: ACTIVE | MARKET BREADTH: POSITIVE | FII DII DATA: UPDATED | ALERTS: OPERATIONAL | JAI SHRI GANESH | ";
+
+// ─── CUSTOM HOOKS & LOGIC ────────────────────────────────────────────────────
+
+// 1. Intersection Observer for Scroll Animations
+function useInView(options = { threshold: 0.1, rootMargin: "0px" }) {
+  const ref = useRef(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsInView(true);
+        observer.unobserve(entry.target); // Run once
+      }
+    }, options);
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [options.threshold, options.rootMargin]);
+
+  return [ref, isInView];
+}
+
+// ─── NEXT-GEN UI COMPONENTS ──────────────────────────────────────────────────
+
+// Custom Cursor (Ring + Dot)
+function CustomCursor() {
+  const cursorRef = useRef(null);
+  const dotRef = useRef(null);
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      // Direct DOM manipulation for zero-latency tracking
+      if (dotRef.current) dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      // Add slight delay for the outer ring
+      setTimeout(() => {
+        if (cursorRef.current) cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      }, 50);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
+  return (
+    <>
+      <div ref={cursorRef} className="custom-cursor-ring" />
+      <div ref={dotRef} className="custom-cursor-dot" />
+    </>
+  );
+}
+
+// Network Particle Canvas (Constellation Effect)
+function NetworkCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+    let particles = [];
+    let mouse = { x: -1000, y: -1000 };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particles = [];
+      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 12000); 
+      for (let i = 0; i < numNormally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
