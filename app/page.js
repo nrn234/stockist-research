@@ -207,34 +207,59 @@ function ParticleCanvas() {
   );
 }
 
-// Typing Effect with Gradient Cursor
-function TypewriterSubtitle({ text }) {
+// ─── UPDATED: Multi-message Looping Typewriter ───────────────────────────────
+function TypewriterSubtitle({ messages }) {
   const [displayedText, setDisplayedText] = useState("");
-  const [index, setIndex] = useState(0);
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (index < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText((prev) => prev + text[index]);
-        setIndex(index + 1);
-      }, 35); // Typing speed in ms
-      return () => clearTimeout(timeout);
+    const currentMessage = messages[messageIndex];
+    let timeout;
+
+    if (!isDeleting && displayedText !== currentMessage) {
+      // Typing forward
+      timeout = setTimeout(() => {
+        setDisplayedText(currentMessage.slice(0, displayedText.length + 1));
+      }, 40); // Typing speed
+    } else if (!isDeleting && displayedText === currentMessage) {
+      // Pause at the end before deleting
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2500); // 2.5 second pause
+    } else if (isDeleting && displayedText !== "") {
+      // Deleting backward
+      timeout = setTimeout(() => {
+        setDisplayedText(currentMessage.slice(0, displayedText.length - 1));
+      }, 20); // Deleting speed (usually faster)
+    } else if (isDeleting && displayedText === "") {
+      // Move to the next message
+      setIsDeleting(false);
+      setMessageIndex((prev) => (prev + 1) % messages.length);
     }
-  }, [index, text]);
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, messageIndex, messages]);
 
   return (
-    <p style={{
-      color: "#0f172a", fontSize: "clamp(1rem,2vw,1.25rem)",
-      maxWidth: "550px", margin: "0 auto 2.5rem", lineHeight: 1.75,
-      minHeight: "3.5em", display: "inline-flex", alignItems: "center", justifyContent: "center"
+    <div style={{
+      // Fixed min-height ensures the buttons below don't jump up and down while deleting
+      minHeight: "5em", display: "flex", justifyContent: "center", marginBottom: "1.5rem"
     }}>
-      {displayedText}
-      <span className="blinking-cursor" style={{
-        display: "inline-block", width: "4px", height: "1.2em",
-        background: "linear-gradient(180deg, #16a34a, #0ea5e9, #7c3aed, #dc2626)",
-        marginLeft: "4px", transform: "translateY(2px)"
-      }} />
-    </p>
+      <p style={{
+        color: "#0f172a", fontSize: "clamp(1rem,2vw,1.25rem)",
+        maxWidth: "550px", margin: 0, lineHeight: 1.75,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        textAlign: "center"
+      }}>
+        {displayedText}
+        <span className="blinking-cursor" style={{
+          display: "inline-block", width: "4px", height: "1.2em",
+          background: "linear-gradient(180deg, #16a34a, #0ea5e9, #7c3aed, #dc2626)",
+          marginLeft: "4px", transform: "translateY(2px)"
+        }} />
+      </p>
+    </div>
   );
 }
 
@@ -493,7 +518,13 @@ export default function StockistLanding() {
             {RESEARCH_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
           </div>
 
-          <TypewriterSubtitle text="Institutional-quality equity research for every Indian retail investor. Real-time BSE/NSE alerts · XBRL parsing · Smart scoring engine." />
+          {/* THIS IS THE NEW ROTATING TYPEWRITER! */}
+          <TypewriterSubtitle messages={[
+            "Institutional-quality equity research for every Indian retail investor.",
+            "Real-time BSE & NSE alerts delivered straight to your Telegram.",
+            "Advanced XBRL parsing and automated quarterly result analysis.",
+            "Smart 6-tier scoring engine to separate blockbusters from disasters."
+          ]} />
 
           <div style={{ display: "flex", gap: ".875rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{
