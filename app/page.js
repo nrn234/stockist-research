@@ -1,5 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// ─── CONFIGURATION ───────────────────────────────────────────────────────────
+
+const TELEGRAM_LINK = "https://t.me/your_actual_channel_link_here"; // 👈 ADD YOUR LINK HERE
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -26,19 +30,19 @@ const RESEARCH_LETTERS = [
 ];
 
 const TOOLS = [
-  { name: "BSE Live Tracker",        tag: "Real-Time", emoji: "📡" },
-  { name: "NSE Results Pipeline",    tag: "Analysis",  emoji: "📊" },
-  { name: "Telegram Alert Bot",      tag: "Alerts",    emoji: "🤖" },
-  { name: "Verdict Engine",          tag: "Scoring",   emoji: "🏆" },
-  { name: "XBRL Parser",             tag: "Data",      emoji: "📋" },
-  { name: "Deep Research Reporter",  tag: "Reports",   emoji: "📈" },
+  { name: "BSE Live Tracker",    tag: "Real-Time", emoji: "📡" },
+  { name: "NSE Results Pipeline",tag: "Analysis",  emoji: "📊" },
+  { name: "Telegram Alert Bot",  tag: "Alerts",    emoji: "🤖" },
+  { name: "Verdict Engine",      tag: "Scoring",   emoji: "🏆" },
+  { name: "XBRL Parser",         tag: "Data",      emoji: "📋" },
+  { name: "Deep Research Reporter", tag: "Reports",emoji: "📈" },
 ];
 
 const PRINCIPLES = [
-  { bg: "#dcfce7", title: "Real-time data",     icon: "⚡",  desc: "BSE/NSE filings caught within minutes. No stale data, ever.",                        wide: true  },
-  { bg: "#fef3c7", title: "Deep analysis",      icon: "🔬", desc: "YoY, QoQ, EBITDA, CFO — every metric computed correctly.",                           wide: false },
-  { bg: "#dbeafe", title: "Retail-first",       icon: "🎯", desc: "Institutional-grade research made accessible to every Indian investor.",              wide: false },
-  { bg: "#ede9fe", title: "Accurate scoring",   icon: "🏆", desc: "BLOCKBUSTER to POOR — 6-tier verdict engine with full margin awareness.",             wide: true  },
+  { bg: "#dcfce7", title: "Real-time data",  icon: "⚡", desc: "BSE/NSE filings caught within minutes. No stale data, ever.", wide: true  },
+  { bg: "#fef3c7", title: "Deep analysis",   icon: "🔬", desc: "YoY, QoQ, EBITDA, CFO — every metric computed correctly.",  wide: false },
+  { bg: "#dbeafe", title: "Retail-first",    icon: "🎯", desc: "Institutional-grade research made accessible to every Indian investor.", wide: false },
+  { bg: "#ede9fe", title: "Accurate scoring",icon: "🏆", desc: "BLOCKBUSTER to POOR — 6-tier verdict engine with full margin awareness.", wide: true  },
 ];
 
 const TALL_PRINCIPLE = {
@@ -48,6 +52,148 @@ const TALL_PRINCIPLE = {
 
 const TICKER =
   " — BSE FILINGS — NSE RESULTS — XBRL DATA — QUARTERLY EARNINGS — EPS — EBITDA — PAT — CFO — BLOCKBUSTER — MARVELLOUS — GREAT — GOOD — AVERAGE — POOR — DISASTER — INDIA MARKETS — REAL-TIME ALERTS — TELEGRAM BOT";
+
+// ─── NEW INTERACTIVE COMPONENTS ──────────────────────────────────────────────
+
+// 1. Interactive Mouse Particles (Antigravity Style)
+function ParticleCanvas() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+    let particles = [];
+    const colors = ["#16a34a", "#0ea5e9", "#7c3aed", "#d97706", "#dc2626", "#ea580c"];
+    
+    // Track mouse position
+    let mouse = { x: -1000, y: -1000 };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initParticles();
+    };
+
+    const initParticles = () => {
+      particles = [];
+      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 9000); // Responsive density
+      for (let i = 0; i < numParticles; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 3 + 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          angle: Math.random() * Math.PI * 2,
+        });
+      }
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach((p) => {
+        // Normal movement
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Mouse repulsion logic
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDistance = 150; // How close mouse needs to be to push particles
+
+        if (distance < maxDistance) {
+          const force = (maxDistance - distance) / maxDistance;
+          p.x -= (dx / distance) * force * 3;
+          p.y -= (dy / distance) * force * 3;
+        }
+
+        // Screen wrap
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        // Draw particle (little dash like Antigravity)
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.beginPath();
+        ctx.moveTo(-p.size, 0);
+        ctx.lineTo(p.size, 0);
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", (e) => {
+      // Offset mouse to account for scrolling
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+    // Reset mouse offscreen when leaving
+    window.addEventListener("mouseout", () => { mouse = { x: -1000, y: -1000 } });
+
+    resize();
+    draw();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "absolute", inset: 0,
+        width: "100%", height: "100%",
+        pointerEvents: "none", zIndex: 0, opacity: 0.6
+      }}
+    />
+  );
+}
+
+// 2. Typing Effect with Gradient Cursor
+function TypewriterSubtitle({ text }) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (index < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText((prev) => prev + text[index]);
+        setIndex(index + 1);
+      }, 35); // Typing speed in ms
+      return () => clearTimeout(timeout);
+    }
+  }, [index, text]);
+
+  return (
+    <p style={{
+      color: "#0f172a", fontSize: "clamp(1rem,2vw,1.25rem)",
+      maxWidth: "550px", margin: "0 auto 2.5rem", lineHeight: 1.75,
+      minHeight: "3.5em", display: "inline-flex", alignItems: "center", justifyContent: "center"
+    }}>
+      {displayedText}
+      <span className="blinking-cursor" style={{
+        display: "inline-block", width: "4px", height: "1.2em",
+        background: "linear-gradient(180deg, #16a34a, #0ea5e9, #7c3aed, #dc2626)",
+        marginLeft: "4px", transform: "translateY(2px)"
+      }} />
+    </p>
+  );
+}
 
 // ─── SMALL COMPONENTS ────────────────────────────────────────────────────────
 
@@ -87,7 +233,6 @@ function StripeHeading({ text, size = "clamp(3rem,8vw,5.5rem)" }) {
         onMouseLeave={() => set(false)}
         style={{ position: "relative", display: "inline-block", cursor: "default", overflow: "hidden" }}
       >
-        {/* bottom text — slides up */}
         <span style={{
           display: "block", fontSize: size, fontWeight: 900, lineHeight: 1.05,
           transform: on ? "translateY(-100%)" : "translateY(0)",
@@ -95,7 +240,6 @@ function StripeHeading({ text, size = "clamp(3rem,8vw,5.5rem)" }) {
         }}>
           {text}
         </span>
-        {/* top text (green) — also slides up */}
         <span style={{
           position: "absolute", top: "100%", left: 0, right: 0,
           fontSize: size, fontWeight: 900, lineHeight: 1.05,
@@ -105,7 +249,6 @@ function StripeHeading({ text, size = "clamp(3rem,8vw,5.5rem)" }) {
         }}>
           {text}
         </span>
-        {/* three stripes */}
         {[["#FBC138", 8, 0], ["#16a34a", 3, 0.05], ["#7c3aed", -2, 0.1]].map(([bg, bottom, delay]) => (
           <div key={bottom} style={{
             position: "absolute", left: 0, right: 0, height: 4, bottom,
@@ -124,7 +267,6 @@ function ToolCard({ name, emoji, tag }) {
   const [on, set] = useState(false);
   return (
     <div style={{ position: "relative", userSelect: "none" }}>
-      {/* front card */}
       <div
         onMouseEnter={() => set(true)}
         onMouseLeave={() => set(false)}
@@ -144,21 +286,17 @@ function ToolCard({ name, emoji, tag }) {
           <p style={{ fontSize: ".72rem", color: "#16a34a", fontWeight: 700, margin: "4px 0 0", letterSpacing: ".05em" }}>{tag}</p>
         </div>
       </div>
-      {/* yellow bg layer */}
       <div style={{
         position: "absolute", inset: 0,
         background: on ? "#FBC138" : "#fff",
         border: "1.5px solid #000", borderRadius: "1.5rem", zIndex: 1,
         transition: "background .18s",
       }} />
-      {/* green shadow layer */}
       <div style={{
         position: "absolute",
-        top:    on ? "8px"  : "5px",
-        left:   on ? "8px"  : "5px",
-        right:  on ? "-8px" : "-5px",
-        bottom: on ? "-8px" : "-5px",
-        background:  on ? "#16a34a" : "#9ca3af",
+        top: on ? "8px" : "5px", left: on ? "8px" : "5px",
+        right: on ? "-8px" : "-5px", bottom: on ? "-8px" : "-5px",
+        background: on ? "#16a34a" : "#9ca3af",
         border: on ? "1.5px solid #14532d" : "1.5px solid #9ca3af",
         borderRadius: "1.5rem", zIndex: 0,
         transition: "all .18s ease",
@@ -221,6 +359,8 @@ export default function StockistLanding() {
         @keyframes marq { from { transform:translateX(0) } to { transform:translateX(-50%) } }
         .ticker { display:inline-block; white-space:nowrap; animation:marq 40s linear infinite; }
         @keyframes popIn { from { opacity:0; transform:translateX(-50%) scale(.4) } to { opacity:1; transform:translateX(-50%) scale(1) } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .blinking-cursor { animation: blink 1s step-end infinite; }
         * { box-sizing:border-box; }
         a { text-decoration:none; }
       `}</style>
@@ -251,7 +391,7 @@ export default function StockistLanding() {
               {item}
             </a>
           ))}
-          <a href="#telegram" style={{
+          <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
             background: "#16a34a", color: "#fff",
             padding: ".45rem 1.25rem", borderRadius: "9999px",
             fontWeight: 700, fontSize: ".85rem", transition: "background .2s",
@@ -271,6 +411,10 @@ export default function StockistLanding() {
         position: "relative", textAlign: "center",
         padding: "4rem 1.5rem 8rem", overflow: "hidden",
       }}>
+        
+        {/* NEW: Interactive Particle Canvas */}
+        <ParticleCanvas />
+
         {/* grid background */}
         <div style={{
           position: "absolute", inset: 0,
@@ -278,9 +422,10 @@ export default function StockistLanding() {
           backgroundSize: "48px 48px",
           maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)",
           WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)",
+          zIndex: -1
         }} />
 
-        <div style={{ zIndex: 1 }}>
+        <div style={{ zIndex: 1, position: "relative", pointerEvents: "auto" }}>
           <span style={{
             color: "#16a34a", fontWeight: 700, letterSpacing: ".2em",
             fontSize: ".72rem", textTransform: "uppercase",
@@ -289,7 +434,6 @@ export default function StockistLanding() {
             🇮🇳 Made for Indian retail investors · Jai Shri Ganesh 🙏
           </span>
 
-          {/* STOCKIST */}
           <div style={{
             fontSize: "clamp(3.5rem,10vw,8rem)", fontWeight: 900, lineHeight: 1,
             display: "flex", justifyContent: "center", gap: ".01em",
@@ -298,7 +442,6 @@ export default function StockistLanding() {
             {HERO_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
           </div>
 
-          {/* RESEARCH */}
           <div style={{
             fontSize: "clamp(2rem,6vw,4.5rem)", fontWeight: 900, lineHeight: 1,
             display: "flex", justifyContent: "center", gap: ".01em",
@@ -307,13 +450,8 @@ export default function StockistLanding() {
             {RESEARCH_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
           </div>
 
-          <p style={{
-            color: "#64748b", fontSize: "clamp(.95rem,1.8vw,1.15rem)",
-            maxWidth: "520px", margin: "0 auto 2.5rem", lineHeight: 1.75,
-          }}>
-            Institutional-quality equity research for every Indian retail investor.
-            Real-time BSE/NSE alerts · XBRL parsing · Smart scoring engine.
-          </p>
+          {/* NEW: Typewriter Effect for Subtitle */}
+          <TypewriterSubtitle text="Institutional-quality equity research for every Indian retail investor. Real-time BSE/NSE alerts · XBRL parsing · Smart scoring engine." />
 
           <div style={{ display: "flex", gap: ".875rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{
@@ -322,27 +460,28 @@ export default function StockistLanding() {
               fontWeight: 700, fontSize: ".95rem", cursor: "pointer",
               transition: "all .2s", fontFamily: "inherit",
             }}
+              onClick={() => document.getElementById("tools").scrollIntoView({ behavior: 'smooth' })}
               onMouseEnter={e => { e.currentTarget.style.background = "#14532d"; e.currentTarget.style.transform = "translateY(-3px)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#16a34a"; e.currentTarget.style.transform = "none"; }}
             >
               Explore tools →
             </button>
-            <button style={{
+            <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
               background: "transparent", color: "#0f172a",
               border: "2px solid #0f172a", padding: ".85rem 2rem",
               borderRadius: "9999px", fontWeight: 700, fontSize: ".95rem",
               cursor: "pointer", transition: "all .2s", fontFamily: "inherit",
+              display: "inline-flex", alignItems: "center"
             }}
               onMouseEnter={e => { e.currentTarget.style.background = "#FBC138"; e.currentTarget.style.borderColor = "#FBC138"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "#0f172a"; }}
             >
               Join Telegram
-            </button>
+            </a>
           </div>
         </div>
 
-        {/* scrolling ticker */}
-        <div style={{ position: "absolute", bottom: "1.5rem", width: "100%", overflow: "hidden", opacity: .2 }}>
+        <div style={{ position: "absolute", bottom: "1.5rem", width: "100%", overflow: "hidden", opacity: .2, pointerEvents: "none" }}>
           <div className="ticker" style={{ fontSize: ".7rem", fontWeight: 700, letterSpacing: ".12em", color: "#16a34a" }}>
             {(TICKER + " ").repeat(4)}
           </div>
@@ -359,20 +498,6 @@ export default function StockistLanding() {
           margin: "0 auto", padding: "1rem 0 2rem",
         }}>
           {TOOLS.map((t, i) => <ToolCard key={i} {...t} />)}
-        </div>
-        <div style={{ textAlign: "center", marginTop: "1rem" }}>
-          <button style={{
-            border: "2px solid #0f172a", background: "transparent",
-            padding: ".65rem 1.75rem", borderRadius: "9999px",
-            fontWeight: 700, fontSize: ".875rem", cursor: "pointer",
-            transition: "all .2s", fontFamily: "inherit", display: "inline-flex",
-            alignItems: "center", gap: ".5rem",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#0f172a"; e.currentTarget.style.color = "#fff"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#0f172a"; }}
-          >
-            ＋ View all tools
-          </button>
         </div>
       </section>
 
@@ -398,7 +523,6 @@ export default function StockistLanding() {
       <section id="principles" style={{ padding: "1rem 2rem 6rem", background: "#fff", overflow: "hidden" }}>
         <StripeHeading text="Principles" size="clamp(2.5rem,7vw,5rem)" />
         <div style={{ display: "flex", gap: "1.25rem", maxWidth: "1050px", margin: "0 auto", flexWrap: "wrap" }}>
-          {/* left bento grid */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", flex: "2 1 580px" }}>
             <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
               <PrincipleCard {...PRINCIPLES[0]} flex="1 1 52%" />
@@ -409,7 +533,6 @@ export default function StockistLanding() {
               <PrincipleCard {...PRINCIPLES[3]} flex="1 1 52%" />
             </div>
           </div>
-          {/* tall right card */}
           <PrincipleCard {...TALL_PRINCIPLE} flex="1 1 200px" minH="320px" />
         </div>
       </section>
@@ -436,7 +559,13 @@ export default function StockistLanding() {
           Built with 💚 for Indian retail investors · Jai Shri Ganesh 🙏
         </p>
         <div style={{ display: "flex", gap: "2rem", justifyContent: "center", marginBottom: "2.5rem" }}>
-          {["Telegram", "GitHub", "Twitter"].map(s => (
+          <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{ color: "#9ca3af", fontSize: ".875rem", transition: "color .2s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#22c55e")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+          >
+            Telegram
+          </a>
+          {["GitHub", "Twitter"].map(s => (
             <a key={s} href="#" style={{ color: "#9ca3af", fontSize: ".875rem", transition: "color .2s" }}
               onMouseEnter={e => (e.currentTarget.style.color = "#22c55e")}
               onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
@@ -445,7 +574,6 @@ export default function StockistLanding() {
             </a>
           ))}
         </div>
-        {/* footer marquee */}
         <div style={{ overflow: "hidden", opacity: .3, borderTop: "1px solid rgba(22,163,74,.2)", paddingTop: "1.5rem" }}>
           <div className="ticker" style={{ fontSize: ".65rem", fontWeight: 700, color: "#22c55e", letterSpacing: ".12em" }}>
             {("— STOCKIST RESEARCH — JAI SHRI GANESH 🙏 — MADE IN INDIA 🇮🇳 — NSE — BSE — XBRL — BLOCKBUSTER — MARVELLOUS — GREAT — GOOD — AVERAGE — POOR — DISASTER — ").repeat(4)}
@@ -468,7 +596,7 @@ export default function StockistLanding() {
           border: "1px solid rgba(22,163,74,.3)",
           boxShadow: "0 8px 32px rgba(0,0,0,.3)",
         }}>
-          {[["🏠", "#home"], ["Tools", "#tools"], ["Principles", "#principles"], ["About", "#about"], ["📱 Telegram", "#telegram"]].map(([label, href]) => (
+          {[["🏠", "#"], ["Tools", "#tools"], ["Principles", "#principles"], ["About", "#about"]].map(([label, href]) => (
             <a key={label} href={href} style={{
               color: "#d1fae5", padding: ".45rem .85rem",
               borderRadius: "9999px", fontSize: ".8rem", fontWeight: 500,
@@ -480,17 +608,18 @@ export default function StockistLanding() {
               {label}
             </a>
           ))}
-          <button style={{
+          <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
             background: "#16a34a", border: "none", color: "#fff",
             padding: ".45rem 1.25rem", borderRadius: "9999px",
             cursor: "pointer", fontSize: ".8rem", fontWeight: 700,
             transition: "background .2s", fontFamily: "inherit",
+            textDecoration: "none", display: "inline-block"
           }}
             onMouseEnter={e => (e.currentTarget.style.background = "#14532d")}
             onMouseLeave={e => (e.currentTarget.style.background = "#16a34a")}
           >
             Join now →
-          </button>
+          </a>
         </div>
       </div>
     </main>
