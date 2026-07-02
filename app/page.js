@@ -2,12 +2,14 @@
 import { useState, useEffect, useRef } from "react";
 
 // ─── CONFIGURATION ───────────────────────────────────────────────────────────
+
 const TELEGRAM_LINK = "https://t.me/your_actual_channel_link_here"; // 👈 ADD YOUR LINK HERE
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
+
 const HERO_LETTERS = [
   { c: "S", color: "#16a34a", icon: "📈" },
-  { c: "T", color: "#FBC138", icon: "💹" },
+  { c: "T", color: "#d97706", icon: "💹" },
   { c: "O", color: "#0ea5e9", icon: "🔍" },
   { c: "C", color: "#7c3aed", icon: "📊" },
   { c: "K", color: "#dc2626", icon: "⚡" },
@@ -16,63 +18,45 @@ const HERO_LETTERS = [
   { c: "T", color: "#db2777", icon: "🎯" },
 ];
 
+const RESEARCH_LETTERS = [
+  { c: "R", color: "#15803d", icon: "📉" },
+  { c: "E", color: "#b45309", icon: "💰" },
+  { c: "S", color: "#0e7490", icon: "🟢" },
+  { c: "E", color: "#6d28d9", icon: "🔮" },
+  { c: "A", color: "#b91c1c", icon: "🚀" },
+  { c: "R", color: "#0369a1", icon: "🌊" },
+  { c: "C", color: "#c2410c", icon: "🔥" },
+  { c: "H", color: "#be185d", icon: "💎" },
+];
+
 const TOOLS = [
-  { name: "Live BSE/NSE Tracker", tag: "REAL-TIME", emoji: "📡", desc: "Sub-millisecond filing catcher." },
-  { name: "Results Pipeline",     tag: "ANALYSIS",  emoji: "📊", desc: "QoQ & YoY metrics computed instantly." },
-  { name: "Telegram Bot",         tag: "ALERTS",    emoji: "🤖", desc: "Instant terminal-to-mobile delivery." },
-  { name: "Verdict Engine",       tag: "SCORING",   emoji: "🏆", desc: "6-tier algorithmic grading system." },
-  { name: "XBRL Parser",          tag: "DATA",      emoji: "📋", desc: "Deep extraction of nested financials." },
-  { name: "Research Reporter",    tag: "REPORTS",   emoji: "📈", desc: "Institutional-grade PDF generation." },
+  { name: "BSE Live Tracker",    tag: "Real-Time", emoji: "📡" },
+  { name: "NSE Results Pipeline",tag: "Analysis",  emoji: "📊" },
+  { name: "Telegram Alert Bot",  tag: "Alerts",    emoji: "🤖" },
+  { name: "Verdict Engine",      tag: "Scoring",   emoji: "🏆" },
+  { name: "XBRL Parser",         tag: "Data",      emoji: "📋" },
+  { name: "Deep Research Reporter", tag: "Reports",emoji: "📈" },
 ];
 
 const PRINCIPLES = [
-  { title: "Real-time data",  icon: "⚡", desc: "BSE/NSE filings caught within minutes. No stale data, ever." },
-  { title: "Deep analysis",   icon: "🔬", desc: "YoY, QoQ, EBITDA, CFO — every metric computed correctly." },
-  { title: "Retail-first",    icon: "🎯", desc: "Institutional-grade research made accessible to every Indian investor." },
-  { title: "Accurate scoring",icon: "🏆", desc: "BLOCKBUSTER to POOR — 6-tier verdict engine with full margin awareness." },
+  { bg: "#dcfce7", title: "Real-time data",  icon: "⚡", desc: "BSE/NSE filings caught within minutes. No stale data, ever.", wide: true  },
+  { bg: "#fef3c7", title: "Deep analysis",   icon: "🔬", desc: "YoY, QoQ, EBITDA, CFO — every metric computed correctly.",  wide: false },
+  { bg: "#dbeafe", title: "Retail-first",    icon: "🎯", desc: "Institutional-grade research made accessible to every Indian investor.", wide: false },
+  { bg: "#ede9fe", title: "Accurate scoring",icon: "🏆", desc: "BLOCKBUSTER to POOR — 6-tier verdict engine with full margin awareness.", wide: true  },
 ];
 
-const TICKER_DATA = "BSE: ^BSESN +1.2% | NSE: ^NSEI +0.8% | XBRL PARSER: ONLINE | VERDICT ENGINE: ACTIVE | MARKET BREADTH: POSITIVE | FII DII DATA: UPDATED | ALERTS: OPERATIONAL | JAI SHRI GANESH 🙏 | ";
+const TALL_PRINCIPLE = {
+  bg: "#fce7f3", title: "Open & transparent", icon: "🔓",
+  desc: "Built in public. Every algorithm explainable. No black boxes. Jai Shri Ganesh 🙏",
+};
 
-// ─── ADVANCED INTERACTIVE COMPONENTS ─────────────────────────────────────────
+const TICKER =
+  " — BSE FILINGS — NSE RESULTS — XBRL DATA — QUARTERLY EARNINGS — EPS — EBITDA — PAT — CFO — BLOCKBUSTER — MARVELLOUS — GREAT — GOOD — AVERAGE — POOR — DISASTER — INDIA MARKETS — REAL-TIME ALERTS — TELEGRAM BOT";
 
-// 1. Custom Smooth Cursor (Ring + Dot)
-function CustomCursor() {
-  const cursorRef = useRef(null);
-  const dotRef = useRef(null);
+// ─── NEW INTERACTIVE COMPONENTS ──────────────────────────────────────────────
 
-  useEffect(() => {
-    // Only run on desktop
-    if (window.innerWidth < 768) return; 
-
-    const onMouseMove = (e) => {
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      }
-      if (cursorRef.current) {
-        // Slight delay for the ring creates a smooth follow effect
-        setTimeout(() => {
-          if (cursorRef.current) {
-            cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-          }
-        }, 40);
-      }
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    return () => window.removeEventListener("mousemove", onMouseMove);
-  }, []);
-
-  return (
-    <div className="cursor-wrapper">
-      <div ref={cursorRef} className="custom-cursor-ring" />
-      <div ref={dotRef} className="custom-cursor-dot" />
-    </div>
-  );
-}
-
-// 2. Network Particle Web Canvas (Connections between dots)
-function NetworkCanvas() {
+// Interactive Mouse Particles & "Boom" Click Effect (Now Fixed to Screen)
+function ParticleCanvas() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -80,20 +64,29 @@ function NetworkCanvas() {
     const ctx = canvas.getContext("2d");
     let animationFrameId;
     let particles = [];
+    let bursts = []; 
+    const colors = ["#16a34a", "#0ea5e9", "#7c3aed", "#d97706", "#dc2626", "#ea580c"];
+    
     let mouse = { x: -1000, y: -1000 };
 
-    const initParticles = () => {
+    const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      initParticles();
+    };
+
+    const initParticles = () => {
       particles = [];
-      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 15000); 
+      const numParticles = Math.floor((window.innerWidth * window.innerHeight) / 9000); 
       for (let i = 0; i < numParticles; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
+          size: Math.random() * 3 + 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
-          size: Math.random() * 2 + 1,
+          angle: Math.random() * Math.PI * 2,
         });
       }
     };
@@ -101,72 +94,96 @@ function NetworkCanvas() {
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      particles.forEach((p, index) => {
+      particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Screen wrap
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDistance = 150; 
+
+        if (distance < maxDistance) {
+          const force = (maxDistance - distance) / maxDistance;
+          p.x -= (dx / distance) * force * 3;
+          p.y -= (dy / distance) * force * 3;
+        }
+
         if (p.x < 0) p.x = canvas.width;
         if (p.x > canvas.width) p.x = 0;
         if (p.y < 0) p.y = canvas.height;
         if (p.y > canvas.height) p.y = 0;
 
-        // Draw particle
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(22, 163, 74, 0.5)"; // Neon green dots
-        ctx.fill();
-
-        // Connect particles
-        for (let j = index + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 120) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(22, 163, 74, ${1 - distance / 120})`; 
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-
-        // Mouse interaction (Repel)
-        const dxMouse = mouse.x - p.x;
-        const dyMouse = mouse.y - p.y;
-        const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-        if (distMouse < 150) {
-          const force = (150 - distMouse) / 150;
-          p.x -= (dxMouse / distMouse) * force * 2;
-          p.y -= (dyMouse / distMouse) * force * 2;
-          
-          // Draw line to mouse
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(251, 193, 56, ${force})`; // Gold line to mouse
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
+        ctx.moveTo(-p.size, 0);
+        ctx.lineTo(p.size, 0);
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
       });
+
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        let b = bursts[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life -= 0.02; 
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, b.life); 
+        ctx.translate(b.x, b.y);
+        ctx.beginPath();
+        ctx.arc(0, 0, b.size, 0, Math.PI * 2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+        ctx.restore();
+
+        if (b.life <= 0) bursts.splice(i, 1);
+      }
 
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    window.addEventListener("resize", initParticles);
-    window.addEventListener("mousemove", (e) => {
+    // Since canvas is position: fixed, we use clientX/clientY directly!
+    const handleMouseMove = (e) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-    });
-    
-    initParticles();
+    };
+
+    const handleClick = (e) => {
+      const cx = e.clientX;
+      const cy = e.clientY;
+      
+      for(let i = 0; i < 35; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 6 + 2; 
+        bursts.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 4 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1.0 
+        });
+      }
+    };
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("click", handleClick);
+    window.addEventListener("mouseout", () => { mouse = { x: -1000, y: -1000 } });
+
+    resize();
     draw();
 
     return () => {
-      window.removeEventListener("resize", initParticles);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -177,80 +194,206 @@ function NetworkCanvas() {
       style={{
         position: "fixed", top: 0, left: 0,
         width: "100vw", height: "100vh",
-        pointerEvents: "none", zIndex: 0, opacity: 0.8
+        pointerEvents: "none", zIndex: 0, opacity: 0.6
       }}
     />
   );
 }
 
-// 3. 3D Tilt Card Component (Glassmorphism)
-function TiltCard({ children }) {
-  const cardRef = useRef(null);
+// Multi-message Looping Typewriter
+function TypewriterSubtitle({ messages }) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleMouseMove = (e) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -10; // Max 10 deg rotation
-    const rotateY = ((x - centerX) / centerX) * 10;
-    
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    card.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(22,163,74,0.3)";
-  };
+  useEffect(() => {
+    const currentMessage = messages[messageIndex];
+    let timeout;
 
-  const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
-    card.style.boxShadow = "0 8px 32px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.1)";
-  };
+    if (!isDeleting && displayedText !== currentMessage) {
+      timeout = setTimeout(() => {
+        setDisplayedText(currentMessage.slice(0, displayedText.length + 1));
+      }, 40);
+    } else if (!isDeleting && displayedText === currentMessage) {
+      timeout = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2500); 
+    } else if (isDeleting && displayedText !== "") {
+      timeout = setTimeout(() => {
+        setDisplayedText(currentMessage.slice(0, displayedText.length - 1));
+      }, 20); 
+    } else if (isDeleting && displayedText === "") {
+      setIsDeleting(false);
+      setMessageIndex((prev) => (prev + 1) % messages.length);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, messageIndex, messages]);
 
   return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="glass-card"
-      style={{
-        transition: "transform 0.2s ease-out, box-shadow 0.2s ease-out",
-        transformStyle: "preserve-3d",
-      }}
-    >
-      <div style={{ transform: "translateZ(30px)" }}>{children}</div>
+    <div style={{ minHeight: "5em", display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+      <p style={{
+        color: "#0f172a", fontSize: "clamp(1rem,2vw,1.25rem)",
+        maxWidth: "550px", margin: 0, lineHeight: 1.75,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        textAlign: "center"
+      }}>
+        {displayedText}
+        <span className="blinking-cursor" style={{
+          display: "inline-block", width: "4px", height: "1.2em",
+          background: "linear-gradient(180deg, #16a34a, #0ea5e9, #7c3aed, #dc2626)",
+          marginLeft: "4px", transform: "translateY(2px)"
+        }} />
+      </p>
     </div>
   );
 }
 
-// 4. Glitch / Scramble Text Effect
-function ScrambleText({ text, delay = 0 }) {
-  const [displayText, setDisplayText] = useState("");
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-  
-  useEffect(() => {
-    let iteration = 0;
-    let interval = null;
+// ─── SMALL COMPONENTS ────────────────────────────────────────────────────────
 
-    setTimeout(() => {
-      interval = setInterval(() => {
-        setDisplayText(
-          text.split("").map((letter, index) => {
-            if (index < iteration) return text[index];
-            return characters[Math.floor(Math.random() * characters.length)];
-          }).join("")
-        );
-        if (iteration >= text.length) clearInterval(interval);
-        iteration += 1 / 3;
-      }, 30);
-    }, delay);
+function HoverLetter({ c, color, icon }) {
+  const [on, set] = useState(false);
+  return (
+    <span
+      onMouseEnter={() => set(true)}
+      onMouseLeave={() => set(false)}
+      style={{
+        position: "relative", display: "inline-block", cursor: "crosshair",
+        color: on ? color : "inherit",
+        transition: "color .3s ease",
+      }}
+    >
+      {on && (
+        <span style={{
+          position: "absolute", top: "-2.4rem", left: "50%",
+          transform: "translateX(-50%)", fontSize: "1.3rem",
+          pointerEvents: "none", zIndex: 10,
+          animation: "popIn .25s ease forwards",
+        }}>
+          {icon}
+        </span>
+      )}
+      {c}
+    </span>
+  );
+}
 
-    return () => clearInterval(interval);
-  }, [text, delay]);
+function StripeHeading({ text, size = "clamp(3rem,8vw,5.5rem)" }) {
+  const [on, set] = useState(false);
+  return (
+    <div style={{ textAlign: "center", paddingTop: "4rem", marginBottom: "3rem" }}>
+      <div
+        onMouseEnter={() => set(true)}
+        onMouseLeave={() => set(false)}
+        style={{ position: "relative", display: "inline-block", cursor: "default", overflow: "hidden" }}
+      >
+        <span style={{
+          display: "block", fontSize: size, fontWeight: 900, lineHeight: 1.05,
+          transform: on ? "translateY(-100%)" : "translateY(0)",
+          transition: "transform .4s cubic-bezier(.23,1,.32,1)",
+        }}>
+          {text}
+        </span>
+        <span style={{
+          position: "absolute", top: "100%", left: 0, right: 0,
+          fontSize: size, fontWeight: 900, lineHeight: 1.05,
+          color: "#16a34a", whiteSpace: "nowrap",
+          transform: on ? "translateY(-100%)" : "translateY(0)",
+          transition: "transform .4s cubic-bezier(.23,1,.32,1)",
+        }}>
+          {text}
+        </span>
+        {[["#FBC138", 8, 0], ["#16a34a", 3, 0.05], ["#7c3aed", -2, 0.1]].map(([bg, bottom, delay]) => (
+          <div key={bottom} style={{
+            position: "absolute", left: 0, right: 0, height: 4, bottom,
+            background: bg,
+            transform: on ? "scaleX(1)" : "scaleX(0)",
+            transformOrigin: "left",
+            transition: `transform .4s ease ${delay}s`,
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  return <span>{displayText || text.replace(/./g, '_')}</span>;
+function ToolCard({ name, emoji, tag }) {
+  const [on, set] = useState(false);
+  return (
+    <div style={{ position: "relative", userSelect: "none" }}>
+      <div
+        onMouseEnter={() => set(true)}
+        onMouseLeave={() => set(false)}
+        style={{
+          display: "flex", gap: "1.1rem", padding: "1.25rem 1.5rem",
+          borderRadius: "1.5rem", height: "6.5rem", alignItems: "center",
+          background: "#fff", border: "1.5px solid #000",
+          position: "relative",
+          top: on ? "-8px" : 0, left: on ? "-8px" : 0,
+          transition: "top .18s ease, left .18s ease",
+          zIndex: 3, cursor: "pointer",
+        }}
+      >
+        <span style={{ fontSize: "2rem" }}>{emoji}</span>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: ".9rem", margin: 0, color: "#0f172a" }}>{name}</p>
+          <p style={{ fontSize: ".72rem", color: "#16a34a", fontWeight: 700, margin: "4px 0 0", letterSpacing: ".05em" }}>{tag}</p>
+        </div>
+      </div>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: on ? "#FBC138" : "#fff",
+        border: "1.5px solid #000", borderRadius: "1.5rem", zIndex: 1,
+        transition: "background .18s",
+      }} />
+      <div style={{
+        position: "absolute",
+        top: on ? "8px" : "5px", left: on ? "8px" : "5px",
+        right: on ? "-8px" : "-5px", bottom: on ? "-8px" : "-5px",
+        background: on ? "#16a34a" : "#9ca3af",
+        border: on ? "1.5px solid #14532d" : "1.5px solid #9ca3af",
+        borderRadius: "1.5rem", zIndex: 0,
+        transition: "all .18s ease",
+      }} />
+    </div>
+  );
+}
+
+function PrincipleCard({ bg, title, icon, desc, flex = "1 1 45%", minH = "180px" }) {
+  const [on, set] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => set(true)}
+      onMouseLeave={() => set(false)}
+      style={{
+        background: bg, borderRadius: "1.5rem", padding: "2rem",
+        display: "flex", flexDirection: "column", justifyContent: "space-between",
+        flex, minHeight: minH, cursor: "default",
+        transition: "transform .3s ease",
+        transform: on ? "translateY(-6px)" : "none",
+      }}
+    >
+      <span style={{
+        fontSize: "2.2rem", display: "inline-block",
+        transition: "transform .3s",
+        transform: on ? "scale(1.15) rotate(5deg)" : "scale(1)",
+      }}>
+        {icon}
+      </span>
+      <div style={{ marginTop: "1.5rem" }}>
+        <p style={{
+          fontSize: "clamp(1.1rem,2.2vw,1.6rem)",
+          fontWeight: on ? 600 : 300,
+          margin: 0, transition: "font-weight .3s", color: "#0f172a",
+        }}>
+          {title}
+        </p>
+        <p style={{ fontSize: ".82rem", opacity: .75, margin: ".4rem 0 0", color: "#374151" }}>
+          {desc}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
@@ -259,212 +402,281 @@ export default function StockistLanding() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <main style={{ backgroundColor: "#050505", color: "#e2e8f0", overflowX: "hidden", minHeight: "100vh", position: "relative" }}>
-      
-      {/* ─── GLOBAL CSS STYLES (NO TAILWIND REQUIRED) ─── */}
+    <main style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#FAFAF9", color: "#0f172a", overflowX: "hidden", position: "relative" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400..800&display=swap');
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { font-family: 'Space Mono', monospace; cursor: none; scroll-behavior: smooth; }
-        a, button { cursor: none; }
-        
-        /* Cursor Styles */
-        .cursor-wrapper { pointer-events: none; z-index: 9999; position: fixed; inset: 0; overflow: hidden; }
-        .custom-cursor-dot {
-          position: absolute; top: -4px; left: -4px; width: 8px; height: 8px;
-          background-color: #16a34a; border-radius: 50%; pointer-events: none;
-          box-shadow: 0 0 10px #16a34a, 0 0 20px #16a34a;
-        }
-        .custom-cursor-ring {
-          position: absolute; top: -15px; left: -15px; width: 30px; height: 30px;
-          border: 1.5px solid rgba(22, 163, 74, 0.6); border-radius: 50%; pointer-events: none;
-          transition: width 0.2s, height 0.2s, top 0.2s, left 0.2s;
-        }
-        a:hover ~ .cursor-wrapper .custom-cursor-ring, button:hover ~ .cursor-wrapper .custom-cursor-ring {
-          width: 50px; height: 50px; top: -25px; left: -25px; border-color: #FBC138; background: rgba(251,193,56,0.1);
-        }
-
-        /* Animations */
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .ticker-track { display: inline-block; white-space: nowrap; animation: ticker 30s linear infinite; }
-        
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .floating { animation: float 6s ease-in-out infinite; }
-
-        /* Glassmorphism */
-        .glass-panel {
-          background: rgba(255, 255, 255, 0.02);
-          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-bottom: 1px solid rgba(22, 163, 74, 0.3);
-        }
-        .glass-card {
-          background: linear-gradient(145deg, rgba(30,30,30,0.6) 0%, rgba(10,10,10,0.8) 100%);
-          backdrop-filter: blur(10px);
-          border-radius: 1.5rem; padding: 2rem;
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.1);
-        }
-        
-        /* Noise Texture */
-        .noise-bg {
-          position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.04;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-        
-        .heading-syne { font-family: 'Syne', sans-serif; font-weight: 800; }
-        .gradient-text { background: linear-gradient(90deg, #16a34a, #FBC138); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        @keyframes marq { from { transform:translateX(0) } to { transform:translateX(-50%) } }
+        .ticker { display:inline-block; white-space:nowrap; animation:marq 40s linear infinite; }
+        @keyframes popIn { from { opacity:0; transform:translateX(-50%) scale(.4) } to { opacity:1; transform:translateX(-50%) scale(1) } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .blinking-cursor { animation: blink 1s step-end infinite; }
+        * { box-sizing:border-box; }
+        a { text-decoration:none; }
       `}</style>
 
-      <CustomCursor />
-      <NetworkCanvas />
-      <div className="noise-bg" />
+      {/* ── GLOBAL BACKGROUND EFFECTS ─────────────────────────────────── */}
+      <ParticleCanvas />
+      
+      {/* Global Grid */}
+      <div style={{
+        position: "fixed", inset: 0,
+        backgroundImage: "linear-gradient(rgba(22,163,74,.07) 1px,transparent 1px),linear-gradient(to right,rgba(22,163,74,.07) 1px,transparent 1px)",
+        backgroundSize: "48px 48px",
+        zIndex: 0, pointerEvents: "none"
+      }} />
 
-      {/* ── LIVE TICKER BAR ── */}
-      <div style={{ background: "#16a34a", color: "#000", padding: "0.4rem 0", fontSize: "0.75rem", fontWeight: 700, overflow: "hidden", position: "relative", zIndex: 50 }}>
-        <div className="ticker-track">
-          {TICKER_DATA.repeat(4)}
-        </div>
-      </div>
-
-      {/* ── TOP NAV ── */}
-      <nav className={scrolled ? "glass-panel" : ""} style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 2.5rem",
-        position: "sticky", top: 0, zIndex: 40, transition: "all 0.3s ease",
+      {/* ── TOP NAV ───────────────────────────────────────────────────── */}
+      <nav style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "1rem 2.5rem",
+        background: scrolled ? "rgba(250,250,249,.96)" : "transparent",
+        backdropFilter: "blur(10px)",
+        borderBottom: scrolled ? ".5px solid rgba(22,163,74,.15)" : "none",
+        position: "sticky", top: 0, zIndex: 50,
+        transition: "background .3s, border-bottom .3s",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>
-          <div style={{ width: "12px", height: "12px", background: "#16a34a", borderRadius: "50%", boxShadow: "0 0 10px #16a34a" }} />
-          <span className="heading-syne" style={{ fontSize: "1.2rem", color: "#fff", letterSpacing: ".1em" }}>
-            STOCKIST<span style={{color: "#16a34a"}}>.</span>RESEARCH
+        <div style={{ display: "flex", alignItems: "center", gap: ".6rem" }}>
+          <span style={{ fontSize: "1.5rem" }}>📊</span>
+          <span style={{ fontWeight: 900, fontSize: ".9rem", color: "#14532d", letterSpacing: ".08em" }}>
+            STOCKIST RESEARCH
           </span>
         </div>
-        <div style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-          {["Tools", "Engine", "About"].map(item => (
-            <a key={item} href={`#${item.toLowerCase()}`} style={{ color: "#94a3b8", fontSize: "0.85rem", textTransform: "uppercase", transition: "color 0.2s" }} onMouseEnter={e => e.target.style.color = "#16a34a"} onMouseLeave={e => e.target.style.color = "#94a3b8"}>
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          {["Tools", "Principles", "About"].map(item => (
+            <a key={item} href={`#${item.toLowerCase()}`}
+              style={{ color: "#64748b", fontSize: ".9rem", fontWeight: 500, transition: "color .2s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#16a34a")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#64748b")}
+            >
               {item}
             </a>
           ))}
           <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
-            background: "rgba(22, 163, 74, 0.1)", color: "#16a34a", border: "1px solid #16a34a",
-            padding: "0.5rem 1.5rem", borderRadius: "4px", fontSize: "0.85rem", fontWeight: 700,
-            textTransform: "uppercase", transition: "all 0.2s"
-          }} onMouseEnter={e => { e.target.style.background = "#16a34a"; e.target.style.color = "#000"; e.target.style.boxShadow = "0 0 20px rgba(22,163,74,0.4)"; }} onMouseLeave={e => { e.target.style.background = "rgba(22, 163, 74, 0.1)"; e.target.style.color = "#16a34a"; e.target.style.boxShadow = "none"; }}>
-            [ Connect Bot ]
+            background: "#16a34a", color: "#fff",
+            padding: ".45rem 1.25rem", borderRadius: "9999px",
+            fontWeight: 700, fontSize: ".85rem", transition: "background .2s",
+          }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#14532d")}
+            onMouseLeave={e => (e.currentTarget.style.background = "#16a34a")}
+          >
+            Join Telegram →
           </a>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section style={{ minHeight: "85vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", textAlign: "center", padding: "4rem 2rem", zIndex: 10 }}>
-        
-        <div style={{ padding: "0.5rem 1rem", border: "1px solid rgba(251,193,56,0.3)", borderRadius: "100px", color: "#FBC138", fontSize: "0.75rem", marginBottom: "2rem", background: "rgba(251,193,56,0.05)" }}>
-          <span style={{ marginRight: "8px" }}>🟢</span> SYSTEM STATUS: ONLINE
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <section style={{
+        minHeight: "calc(100vh - 60px)", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        position: "relative", textAlign: "center",
+        padding: "4rem 1.5rem 8rem", overflow: "hidden", zIndex: 10
+      }}>
+        <div style={{ zIndex: 1, position: "relative", pointerEvents: "auto" }}>
+          <span style={{
+            color: "#16a34a", fontWeight: 700, letterSpacing: ".2em",
+            fontSize: ".72rem", textTransform: "uppercase",
+            display: "block", marginBottom: "1.5rem",
+          }}>
+            🇮🇳 Made for Indian retail investors · Jai Shri Ganesh 🙏
+          </span>
+
+          <div style={{
+            fontSize: "clamp(3.5rem,10vw,8rem)", fontWeight: 900, lineHeight: 1,
+            display: "flex", justifyContent: "center", gap: ".01em",
+            marginBottom: ".2rem", userSelect: "none",
+          }}>
+            {HERO_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
+          </div>
+
+          <div style={{
+            fontSize: "clamp(2rem,6vw,4.5rem)", fontWeight: 900, lineHeight: 1,
+            display: "flex", justifyContent: "center", gap: ".01em",
+            marginBottom: "2rem", userSelect: "none", opacity: .85,
+          }}>
+            {RESEARCH_LETTERS.map((l, i) => <HoverLetter key={i} {...l} />)}
+          </div>
+
+          <TypewriterSubtitle messages={[
+            "Institutional-quality equity research for every Indian retail investor.",
+            "Real-time BSE & NSE alerts delivered straight to your Telegram.",
+            "Advanced XBRL parsing and automated quarterly result analysis.",
+            "Smart 6-tier scoring engine to separate blockbusters from disasters."
+          ]} />
+
+          <div style={{ display: "flex", gap: ".875rem", justifyContent: "center", flexWrap: "wrap" }}>
+            <button style={{
+              background: "#16a34a", color: "#fff", border: "none",
+              padding: ".85rem 2rem", borderRadius: "9999px",
+              fontWeight: 700, fontSize: ".95rem", cursor: "pointer",
+              transition: "all .2s", fontFamily: "inherit",
+            }}
+              onClick={() => document.getElementById("tools").scrollIntoView({ behavior: 'smooth' })}
+              onMouseEnter={e => { e.currentTarget.style.background = "#14532d"; e.currentTarget.style.transform = "translateY(-3px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#16a34a"; e.currentTarget.style.transform = "none"; }}
+            >
+              Explore tools →
+            </button>
+            <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
+              background: "transparent", color: "#0f172a",
+              border: "2px solid #0f172a", padding: ".85rem 2rem",
+              borderRadius: "9999px", fontWeight: 700, fontSize: ".95rem",
+              cursor: "pointer", transition: "all .2s", fontFamily: "inherit",
+              display: "inline-flex", alignItems: "center"
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#FBC138"; e.currentTarget.style.borderColor = "#FBC138"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "#0f172a"; }}
+            >
+              Join Telegram
+            </a>
+          </div>
         </div>
 
-        <h1 className="heading-syne" style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)", lineHeight: 1, marginBottom: "1rem", color: "#fff" }}>
-          <ScrambleText text="INSTITUTIONAL" delay={0} /><br />
-          <span className="gradient-text"><ScrambleText text="EDGE FOR RETAIL" delay={1000} /></span>
-        </h1>
-
-        <p style={{ color: "#94a3b8", fontSize: "clamp(1rem, 1.5vw, 1.25rem)", maxWidth: "600px", margin: "1.5rem auto 3rem", lineHeight: 1.8 }}>
-          Real-time BSE & NSE alerts, XBRL parsing, and a 6-tier scoring engine. 
-          The ultimate terminal experience delivered to your Telegram.
-        </p>
-
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-          <button style={{
-            background: "#16a34a", color: "#000", border: "none", padding: "1rem 2.5rem",
-            fontSize: "1rem", fontWeight: 700, clipPath: "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)",
-            transition: "all 0.2s"
-          }} onMouseEnter={e => { e.target.style.background = "#fff"; e.target.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.target.style.background = "#16a34a"; e.target.style.transform = "none"; }}>
-            INITIALIZE ENGINE
-          </button>
+        <div style={{ position: "absolute", bottom: "1.5rem", width: "100%", overflow: "hidden", opacity: .2, pointerEvents: "none" }}>
+          <div className="ticker" style={{ fontSize: ".7rem", fontWeight: 700, letterSpacing: ".12em", color: "#16a34a" }}>
+            {(TICKER + " ").repeat(4)}
+          </div>
         </div>
       </section>
 
-      {/* ── STATS BAR ── */}
-      <div style={{ display: "flex", flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,0.1)", borderBottom: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.4)", zIndex: 10, position: "relative" }}>
-        {[
-          { label: "LATENCY", val: "< 500ms" },
-          { label: "VERDICT ENGINE", val: "6-TIER" },
-          { label: "MARKETS", val: "BSE / NSE" },
-          { label: "DATA FORMAT", val: "XBRL / PDF" }
-        ].map((stat, i) => (
-          <div key={i} style={{ flex: "1 1 200px", padding: "2rem", borderRight: "1px solid rgba(255,255,255,0.1)", textAlign: "center" }}>
-            <p style={{ color: "#64748b", fontSize: "0.75rem", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>{stat.label}</p>
-            <p className="heading-syne" style={{ fontSize: "1.75rem", color: "#fff" }}>{stat.val}</p>
-          </div>
-        ))}
-      </div>
+      {/* ── TOOLS ────────────────────────────────────────────────────── */}
+      <section id="tools" style={{ padding: "1rem 2rem 6rem", background: "rgba(255,255,255,0.6)", overflow: "hidden", position: "relative", zIndex: 10 }}>
+        <StripeHeading text="Tools" />
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill,minmax(270px,1fr))",
+          gap: "3rem 2rem", maxWidth: "960px",
+          margin: "0 auto", padding: "1rem 0 2rem",
+        }}>
+          {TOOLS.map((t, i) => <ToolCard key={i} {...t} />)}
+        </div>
+      </section>
 
-      {/* ── TOOLS GRID (3D TILT CARDS) ── */}
-      <section id="tools" style={{ padding: "8rem 2rem", position: "relative", zIndex: 10, maxWidth: "1200px", margin: "0 auto" }}>
-        <h2 className="heading-syne" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", textAlign: "center", marginBottom: "4rem" }}>
-          [ <span style={{color: "#16a34a"}}>SYSTEM</span> MODULES ]
+      {/* ── STATS ────────────────────────────────────────────────────── */}
+      <section style={{ padding: "4rem 2rem", background: "transparent", textAlign: "center", position: "relative", zIndex: 10 }}>
+        <h2 style={{ fontSize: "clamp(1.4rem,3.5vw,2.25rem)", fontWeight: 800, maxWidth: "560px", margin: "0 auto 2.5rem", lineHeight: 1.25 }}>
+          Trusted by Indian retail investors nationwide 🇮🇳
         </h2>
-        
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem" }}>
-          {TOOLS.map((tool, i) => (
-            <TiltCard key={i}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "2.5rem" }}>{tool.emoji}</span>
-                <span style={{ color: "#16a34a", fontSize: "0.7rem", padding: "4px 8px", border: "1px solid #16a34a", borderRadius: "4px", letterSpacing: "1px" }}>
-                  {tool.tag}
-                </span>
-              </div>
-              <h3 className="heading-syne" style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "#fff" }}>{tool.name}</h3>
-              <p style={{ color: "#94a3b8", fontSize: "0.9rem", lineHeight: 1.6 }}>{tool.desc}</p>
-              <div style={{ marginTop: "2rem", height: "2px", width: "100%", background: "linear-gradient(90deg, #16a34a 0%, transparent 100%)" }} />
-            </TiltCard>
+        <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center", flexWrap: "wrap" }}>
+          {[["1,000+", "Filings tracked"], ["15+", "Alert categories"], ["6-tier", "Verdict engine"], ["Live", "BSE/NSE data"]].map(([num, label]) => (
+            <div key={label} style={{
+              padding: "1.25rem 1.75rem", background: "#fff",
+              borderRadius: "1rem", border: ".5px solid #e5e7eb", minWidth: "135px",
+            }}>
+              <p style={{ fontSize: "2rem", fontWeight: 900, color: "#16a34a", margin: 0 }}>{num}</p>
+              <p style={{ color: "#64748b", fontSize: ".8rem", margin: ".25rem 0 0", fontWeight: 500 }}>{label}</p>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ── ABOUT / PRINCIPLES ── */}
-      <section id="about" style={{ padding: "6rem 2rem", background: "rgba(10,10,10,0.8)", borderTop: "1px solid rgba(22,163,74,0.2)", position: "relative", zIndex: 10 }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
-          <p style={{ color: "#FBC138", fontSize: "0.85rem", letterSpacing: "2px", marginBottom: "1rem" }}>MISSION CONTROL</p>
-          <h2 className="heading-syne" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", marginBottom: "2rem" }}>
-            Democratizing institutional research for the retail investor.
-          </h2>
-          <p style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: 1.8, marginBottom: "3rem" }}>
-            Built from Nokha, Rajasthan. Every algorithm is crafted to strip away the noise and give you the raw, computed truth of the markets faster than humanly possible. No black boxes.
-          </p>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", textAlign: "left" }}>
-            {PRINCIPLES.map((p, i) => (
-              <div key={i} style={{ padding: "1.5rem", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px" }}>
-                <h4 style={{ color: "#fff", marginBottom: "0.5rem" }}>{p.icon} {p.title}</h4>
-                <p style={{ color: "#64748b", fontSize: "0.85rem", lineHeight: 1.5 }}>{p.desc}</p>
-              </div>
-            ))}
+      {/* ── PRINCIPLES ───────────────────────────────────────────────── */}
+      <section id="principles" style={{ padding: "1rem 2rem 6rem", background: "rgba(255,255,255,0.6)", overflow: "hidden", position: "relative", zIndex: 10 }}>
+        <StripeHeading text="Principles" size="clamp(2.5rem,7vw,5rem)" />
+        <div style={{ display: "flex", gap: "1.25rem", maxWidth: "1050px", margin: "0 auto", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", flex: "2 1 580px" }}>
+            <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+              <PrincipleCard {...PRINCIPLES[0]} flex="1 1 52%" />
+              <PrincipleCard {...PRINCIPLES[1]} flex="1 1 38%" />
+            </div>
+            <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+              <PrincipleCard {...PRINCIPLES[2]} flex="1 1 38%" />
+              <PrincipleCard {...PRINCIPLES[3]} flex="1 1 52%" />
+            </div>
           </div>
+          <PrincipleCard {...TALL_PRINCIPLE} flex="1 1 200px" minH="320px" />
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer style={{ padding: "4rem 2rem 2rem", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.1)", position: "relative", zIndex: 10 }}>
-        <h2 className="heading-syne" style={{ fontSize: "2rem", color: "#fff", letterSpacing: "4px", marginBottom: "1rem" }}>
-          STOCKIST<span style={{color: "#16a34a"}}>.</span>
+      {/* ── ABOUT ────────────────────────────────────────────────────── */}
+      <section id="about" style={{ padding: "5rem 2rem", background: "transparent", textAlign: "center", position: "relative", zIndex: 10 }}>
+        <p style={{ color: "#16a34a", fontWeight: 700, letterSpacing: ".15em", fontSize: ".75rem", textTransform: "uppercase", marginBottom: "1rem" }}>
+          The mission
+        </p>
+        <h2 style={{ fontSize: "clamp(1.4rem,3.5vw,2.25rem)", fontWeight: 800, maxWidth: "600px", margin: "0 auto 1.5rem", lineHeight: 1.25 }}>
+          Democratizing institutional-quality research for Indian retail investors
         </h2>
-        <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "2rem" }}>
+        <p style={{ color: "#64748b", fontSize: "1rem", maxWidth: "500px", margin: "0 auto", lineHeight: 1.75 }}>
+          Built from Nokha, Rajasthan. Every tool crafted to give the retail investor the same edge that institutions have — real-time filings, smart scoring, deep analysis.
+        </p>
+      </section>
+
+      {/* ── FOOTER ───────────────────────────────────────────────────── */}
+      <footer style={{ background: "#0f1a0f", color: "#fff", padding: "3rem 2rem 2rem", textAlign: "center", position: "relative", zIndex: 10 }}>
+        <div style={{ fontSize: "1.1rem", fontWeight: 900, color: "#FBC138", letterSpacing: ".1em", marginBottom: ".6rem" }}>
+          📊 STOCKIST RESEARCH
+        </div>
+        <p style={{ color: "#6b7280", fontSize: ".82rem", marginBottom: "2rem" }}>
           Built with 💚 for Indian retail investors · Jai Shri Ganesh 🙏
         </p>
-        <div style={{ display: "flex", gap: "2rem", justifyContent: "center" }}>
-          {["TELEGRAM", "GITHUB", "TWITTER"].map(s => (
-            <a key={s} href="#" style={{ color: "#94a3b8", fontSize: "0.75rem", letterSpacing: "1px", textDecoration: "none" }} onMouseEnter={e => e.target.style.color = "#16a34a"} onMouseLeave={e => e.target.style.color = "#94a3b8"}>
-              [{s}]
+        <div style={{ display: "flex", gap: "2rem", justifyContent: "center", marginBottom: "2.5rem" }}>
+          <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{ color: "#9ca3af", fontSize: ".875rem", transition: "color .2s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#22c55e")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+          >
+            Telegram
+          </a>
+          {["GitHub", "Twitter"].map(s => (
+            <a key={s} href="#" style={{ color: "#9ca3af", fontSize: ".875rem", transition: "color .2s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#22c55e")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+            >
+              {s}
             </a>
           ))}
         </div>
+        <div style={{ overflow: "hidden", opacity: .3, borderTop: "1px solid rgba(22,163,74,.2)", paddingTop: "1.5rem" }}>
+          <div className="ticker" style={{ fontSize: ".65rem", fontWeight: 700, color: "#22c55e", letterSpacing: ".12em" }}>
+            {("— STOCKIST RESEARCH — JAI SHRI GANESH 🙏 — MADE IN INDIA 🇮🇳 — NSE — BSE — XBRL — BLOCKBUSTER — MARVELLOUS — GREAT — GOOD — AVERAGE — POOR — DISASTER — ").repeat(4)}
+          </div>
+        </div>
       </footer>
+
+      {/* ── FLOATING PILL NAV ─────────────────────────────────────────── */}
+      <div style={{
+        position: "fixed", bottom: "1.25rem", left: "50%",
+        transform: "translateX(-50%)", zIndex: 100,
+        display: "flex", justifyContent: "center",
+      }}>
+        <div style={{
+          background: "rgba(15,26,15,.9)",
+          backdropFilter: "blur(12px)",
+          borderRadius: "9999px",
+          padding: ".45rem .65rem",
+          display: "flex", gap: ".2rem", alignItems: "center",
+          border: "1px solid rgba(22,163,74,.3)",
+          boxShadow: "0 8px 32px rgba(0,0,0,.3)",
+        }}>
+          {[["🏠", "#"], ["Tools", "#tools"], ["Principles", "#principles"], ["About", "#about"]].map(([label, href]) => (
+            <a key={label} href={href} style={{
+              color: "#d1fae5", padding: ".45rem .85rem",
+              borderRadius: "9999px", fontSize: ".8rem", fontWeight: 500,
+              transition: "background .2s",
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(22,163,74,.25)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+            >
+              {label}
+            </a>
+          ))}
+          <a href={TELEGRAM_LINK} target="_blank" rel="noreferrer" style={{
+            background: "#16a34a", border: "none", color: "#fff",
+            padding: ".45rem 1.25rem", borderRadius: "9999px",
+            cursor: "pointer", fontSize: ".8rem", fontWeight: 700,
+            transition: "background .2s", fontFamily: "inherit",
+            textDecoration: "none", display: "inline-block"
+          }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#14532d")}
+            onMouseLeave={e => (e.currentTarget.style.background = "#16a34a")}
+          >
+            Join now →
+          </a>
+        </div>
+      </div>
     </main>
   );
 }
